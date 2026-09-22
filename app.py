@@ -4,9 +4,10 @@ import html
 import json
 import streamlit.components.v1 as components
 
-# =========================================================
+
+# ============================================================
 # PAGE CONFIG
-# =========================================================
+# ============================================================
 
 st.set_page_config(
     page_title="MACCO Magic Number",
@@ -15,34 +16,35 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# =========================================================
+
+# ============================================================
 # SESSION STATE
-# =========================================================
+# ============================================================
 
-if "result" not in st.session_state:
-    st.session_state.result = None
+if "macco_result" not in st.session_state:
+    st.session_state.macco_result = None
 
-if "first_name" not in st.session_state:
-    st.session_state.first_name = ""
+if "macco_first" not in st.session_state:
+    st.session_state.macco_first = ""
 
-if "last_name" not in st.session_state:
-    st.session_state.last_name = ""
+if "macco_last" not in st.session_state:
+    st.session_state.macco_last = ""
 
 if "reveal_id" not in st.session_state:
     st.session_state.reveal_id = 0
 
 
-# =========================================================
-# CSS
-# =========================================================
+# ============================================================
+# GLOBAL CSS
+# ============================================================
 
 st.markdown(
     """
 <style>
 
-/* =======================================================
+/* ------------------------------------------------------------
    GLOBAL
-   ======================================================= */
+------------------------------------------------------------ */
 
 html, body, [class*="css"] {
     font-family: Arial, Helvetica, sans-serif;
@@ -50,976 +52,890 @@ html, body, [class*="css"] {
 
 .stApp {
     background:
-        radial-gradient(circle at 10% 15%, rgba(255, 0, 180, .22), transparent 25%),
-        radial-gradient(circle at 88% 12%, rgba(0, 205, 255, .22), transparent 28%),
-        radial-gradient(circle at 50% 75%, rgba(155, 0, 255, .20), transparent 35%),
-        radial-gradient(circle at 15% 90%, rgba(255, 185, 0, .12), transparent 25%),
-        linear-gradient(135deg, #02030a, #09051c, #17072d, #05030d);
+        radial-gradient(circle at 10% 15%, rgba(255,0,190,.18), transparent 24%),
+        radial-gradient(circle at 90% 18%, rgba(0,190,255,.18), transparent 25%),
+        radial-gradient(circle at 50% 80%, rgba(125,45,255,.16), transparent 32%),
+        linear-gradient(145deg, #03050d, #08091c, #120725, #05040d);
 
     color: white;
     overflow-x: hidden;
 }
 
 .block-container {
-    max-width: 790px;
-    padding-top: 1.2rem;
-    padding-bottom: 4rem;
+    max-width: 760px;
+    padding-top: 1.3rem;
+    padding-bottom: 3rem;
 }
 
 
-/* =======================================================
-   FLOATING BACKGROUND LIGHTS
-   ======================================================= */
+/* ------------------------------------------------------------
+   HIDE STREAMLIT CLUTTER
+------------------------------------------------------------ */
 
-.bg-orb {
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+
+/* ------------------------------------------------------------
+   AMBIENT BACKGROUND
+------------------------------------------------------------ */
+
+.macco-orb {
     position: fixed;
     border-radius: 50%;
-    filter: blur(6px);
-    opacity: .35;
-    z-index: 0;
     pointer-events: none;
-    animation: floatOrb 8s ease-in-out infinite alternate;
+    z-index: 0;
+    opacity: .28;
+    filter: blur(8px);
 }
 
-.orb1 {
-    width: 100px;
-    height: 100px;
+.macco-orb-one {
+    width: 95px;
+    height: 95px;
     left: 5%;
-    top: 18%;
-    background: #ff37c7;
-    box-shadow: 0 0 80px #ff37c7;
+    top: 22%;
+    background: #ff32c8;
+    box-shadow: 0 0 70px #ff32c8;
+    animation: floatOne 7s ease-in-out infinite alternate;
 }
 
-.orb2 {
+.macco-orb-two {
     width: 80px;
     height: 80px;
-    right: 5%;
-    top: 35%;
-    background: #35d9ff;
-    box-shadow: 0 0 80px #35d9ff;
-    animation-delay: 1s;
+    right: 6%;
+    top: 38%;
+    background: #39d9ff;
+    box-shadow: 0 0 70px #39d9ff;
+    animation: floatTwo 8s ease-in-out infinite alternate;
 }
 
-.orb3 {
+.macco-orb-three {
     width: 65px;
     height: 65px;
-    left: 15%;
+    left: 17%;
     bottom: 12%;
-    background: #ffd342;
-    box-shadow: 0 0 70px #ffd342;
-    animation-delay: 2s;
+    background: #ffd84c;
+    box-shadow: 0 0 65px #ffd84c;
+    animation: floatOne 9s ease-in-out infinite alternate;
 }
 
-@keyframes floatOrb {
+@keyframes floatOne {
     from {
-        transform: translateY(-10px) scale(.9);
+        transform: translateY(-8px) scale(.9);
     }
+
     to {
-        transform: translateY(30px) scale(1.15);
+        transform: translateY(25px) scale(1.12);
+    }
+}
+
+@keyframes floatTwo {
+    from {
+        transform: translateY(20px) scale(1);
+    }
+
+    to {
+        transform: translateY(-20px) scale(1.15);
     }
 }
 
 
-/* =======================================================
-   TOP DECORATION
-   ======================================================= */
+/* ------------------------------------------------------------
+   HEADER
+------------------------------------------------------------ */
 
-.top-decoration {
+.macco-top {
     text-align: center;
-    font-size: 26px;
-    letter-spacing: 15px;
-    margin-bottom: 8px;
-    animation: topTwinkle 1.5s infinite alternate;
+    font-size: 22px;
+    letter-spacing: 9px;
+    margin-bottom: 10px;
+    animation: twinkleTop 1.6s infinite alternate;
 }
 
-@keyframes topTwinkle {
+@keyframes twinkleTop {
     from {
         opacity: .55;
-        transform: scale(.97);
     }
+
     to {
         opacity: 1;
-        transform: scale(1.04);
     }
 }
 
 
-/* =======================================================
-   DISCO BALL
-   ======================================================= */
+/* ------------------------------------------------------------
+   MAGIC ORB
+------------------------------------------------------------ */
 
-.disco-wrap {
+.magic-orb-wrap {
+    width: 118px;
+    height: 118px;
     position: relative;
-    width: 125px;
-    height: 125px;
     margin: 0 auto 8px auto;
 }
 
-.disco-ring {
+.magic-orb-ring {
     position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 215, 70, .35);
-    box-shadow:
-        0 0 20px #ff40d0,
-        0 0 45px #34d9ff,
-        inset 0 0 20px rgba(255,255,255,.1);
+    inset: -7px;
 
-    animation: ringRotate 8s linear infinite;
+    border-radius: 50%;
+
+    border: 2px solid rgba(255,220,100,.35);
+
+    box-shadow:
+        0 0 18px rgba(255,65,210,.65),
+        0 0 38px rgba(55,215,255,.55);
+
+    animation: ringSpin 7s linear infinite;
 }
 
-@keyframes ringRotate {
+@keyframes ringSpin {
     to {
         transform: rotate(360deg);
     }
 }
 
-.disco-ball {
-    width: 105px;
-    height: 105px;
+.magic-orb {
     position: absolute;
-    left: 10px;
-    top: 10px;
+
+    width: 100px;
+    height: 100px;
+
+    top: 9px;
+    left: 9px;
+
     border-radius: 50%;
 
     background:
         repeating-linear-gradient(
             45deg,
-            rgba(255,255,255,.30) 0px,
-            rgba(255,255,255,.30) 5px,
-            rgba(0,0,0,.08) 5px,
-            rgba(0,0,0,.08) 10px
+            rgba(255,255,255,.22) 0px,
+            rgba(255,255,255,.22) 5px,
+            rgba(0,0,0,.05) 5px,
+            rgba(0,0,0,.05) 10px
         ),
         linear-gradient(
             135deg,
-            #3bcfff,
-            #ae48ff,
-            #ff4dc4,
-            #ffd95c
+            #35d9ff,
+            #a747ff,
+            #ff45c7,
+            #ffdc5a
         );
 
     box-shadow:
-        0 0 18px #a53cff,
-        0 0 38px #3bcfff,
-        0 0 65px rgba(255,75,220,.65);
+        0 0 20px #a53cff,
+        0 0 38px #35d9ff,
+        0 0 55px rgba(255,75,220,.45);
 
-    animation: pulseBall 1.8s infinite alternate;
+    animation: orbPulse 1.8s infinite alternate;
 }
 
-@keyframes pulseBall {
+@keyframes orbPulse {
     from {
-        transform: scale(1) rotate(-4deg);
+        transform: scale(1);
         filter: brightness(1);
     }
+
     to {
-        transform: scale(1.06) rotate(4deg);
-        filter: brightness(1.35);
+        transform: scale(1.05);
+        filter: brightness(1.25);
     }
 }
 
 
-/* =======================================================
-   MACCO BRAND
-   ======================================================= */
+/* ------------------------------------------------------------
+   BRAND
+------------------------------------------------------------ */
 
-.macco {
+.macco-brand {
     text-align: center;
-    font-size: 34px;
-    font-weight: 900;
-    letter-spacing: 12px;
-    margin-top: 12px;
 
-    background: linear-gradient(
-        90deg,
-        #fff4a5,
-        #ffd64e,
-        #ffad00,
-        #fff4a5
-    );
+    font-size: 32px;
+    font-weight: 900;
+
+    letter-spacing: 11px;
+
+    margin-top: 10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #fff5ad,
+            #ffd452,
+            #ffad16,
+            #fff5ad
+        );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
     text-shadow:
-        0 0 8px rgba(255,215,80,.7),
-        0 0 22px rgba(255,180,20,.45);
+        0 0 15px rgba(255,200,60,.25);
 }
 
-.magic-title {
+.macco-title {
     text-align: center;
-    font-size: 48px;
-    font-weight: 900;
-    line-height: 1.05;
-    margin-top: 13px;
 
-    background: linear-gradient(
-        90deg,
-        #ff55d7,
-        #ffd85b,
-        #4bd8ff,
-        #9d62ff,
-        #ff55d7
-    );
+    font-size: 45px;
+    line-height: 1.08;
+
+    font-weight: 900;
+
+    margin-top: 12px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ff4fc8,
+            #ffd95a,
+            #48d9ff,
+            #a764ff,
+            #ff4fc8
+        );
 
     background-size: 300% auto;
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    animation: titleFlow 5s linear infinite;
+    animation: titleMove 5s linear infinite;
 }
 
-@keyframes titleFlow {
+@keyframes titleMove {
     to {
         background-position: 300% center;
     }
 }
 
-.subtitle {
+.macco-subtitle {
     text-align: center;
-    color: #e2e5f4;
-    font-size: 17px;
-    line-height: 1.65;
+
+    color: #d8dcec;
+
+    max-width: 570px;
+
     margin: 14px auto 30px auto;
-    max-width: 600px;
+
+    line-height: 1.6;
+
+    font-size: 16px;
 }
 
 
-/* =======================================================
-   INPUT AREA
-   ======================================================= */
-
-.input-card {
-    border: 1px solid rgba(255,215,90,.25);
-    background: rgba(8,8,25,.45);
-    border-radius: 25px;
-    padding: 8px 16px 4px 16px;
-    margin-bottom: 8px;
-    box-shadow:
-        0 0 25px rgba(157,98,255,.10),
-        inset 0 0 25px rgba(255,255,255,.02);
-}
+/* ------------------------------------------------------------
+   INPUTS
+------------------------------------------------------------ */
 
 label[data-testid="stWidgetLabel"] p {
-    font-weight: 900 !important;
     color: #ffd75d !important;
-    letter-spacing: 1px;
+    font-weight: 800 !important;
+    letter-spacing: .7px;
 }
 
 div[data-testid="stTextInput"] input {
-    height: 58px;
-    border-radius: 17px;
-    font-size: 18px;
-    background-color: rgba(10,12,28,.96);
+    height: 55px;
+
+    border-radius: 16px;
+
+    font-size: 17px;
+
     color: white;
 
-    border: 1px solid rgba(255,215,90,.55);
+    background: rgba(8,10,25,.94);
+
+    border: 1px solid rgba(255,215,90,.48);
 
     box-shadow:
-        inset 0 0 8px rgba(255,255,255,.03),
-        0 0 12px rgba(255,80,220,.08);
+        inset 0 0 8px rgba(255,255,255,.02),
+        0 0 14px rgba(155,70,255,.07);
 }
 
 div[data-testid="stTextInput"] input:focus {
     border: 1px solid #ffd75d;
+
     box-shadow:
-        0 0 12px rgba(255,215,93,.35),
-        0 0 22px rgba(255,80,220,.18);
+        0 0 15px rgba(255,215,90,.22);
 }
 
 
-/* =======================================================
-   BUTTON
-   ======================================================= */
+/* ------------------------------------------------------------
+   MAIN BUTTON
+------------------------------------------------------------ */
 
 div.stButton > button {
     width: 100%;
-    height: 62px;
-    border-radius: 19px;
 
-    border: 1px solid #fff1a3;
+    height: 59px;
 
-    font-size: 20px;
+    margin-top: 8px;
+
+    border-radius: 17px;
+
+    border: 1px solid #ffe996;
+
+    color: #171009;
+
+    font-size: 18px;
+
     font-weight: 900;
-    color: #16100a;
 
     background:
         linear-gradient(
             90deg,
-            #ffae16,
-            #ffe979,
-            #ffbc22,
-            #ffe979,
-            #ffae16
+            #ffb51d,
+            #ffe676,
+            #ffbd27
         );
 
-    background-size: 250% auto;
-
     box-shadow:
-        0 0 12px rgba(255,215,70,.85),
-        0 0 32px rgba(255,170,0,.42);
+        0 0 13px rgba(255,205,55,.55);
 
-    animation: buttonGold 4s linear infinite;
-
-    transition: .2s;
-}
-
-@keyframes buttonGold {
-    to {
-        background-position: 250% center;
-    }
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
 }
 
 div.stButton > button:hover {
-    transform: translateY(-3px) scale(1.012);
+    transform: translateY(-2px);
 
     box-shadow:
-        0 0 18px rgba(255,225,100,1),
-        0 0 45px rgba(255,100,210,.45);
+        0 0 20px rgba(255,220,80,.75);
 }
 
 
-/* =======================================================
-   RESULT HEADER
-   ======================================================= */
+/* ------------------------------------------------------------
+   RESULT
+------------------------------------------------------------ */
 
-.symbol-label {
-    margin-top: 42px;
-    text-align: center;
-    color: #ffd85f;
-    font-weight: 900;
-    letter-spacing: 3px;
-    font-size: 16px;
-}
+.result-heading {
+    margin-top: 40px;
 
-.reveal-text {
     text-align: center;
-    margin-top: 8px;
-    color: #f5eaff;
+
+    color: #ffd95e;
+
     font-size: 14px;
+
+    font-weight: 900;
+
+    letter-spacing: 3px;
+}
+
+.result-subheading {
+    text-align: center;
+
+    color: #d5d9e9;
+
+    font-size: 13px;
+
+    margin-top: 7px;
 }
 
 
-/* =======================================================
-   MAGIC STAGE
-   ======================================================= */
+/* ------------------------------------------------------------
+   MAGIC SYMBOL CARD
+------------------------------------------------------------ */
 
-.stage {
+.magic-stage {
+    width: 100%;
+    max-width: 520px;
+
+    min-height: 430px;
+
+    margin: 20px auto 18px auto;
+
     position: relative;
-    width: 460px;
-    min-height: 510px;
-    margin: 15px auto 0 auto;
+
+    overflow: hidden;
+
+    border-radius: 32px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(255,190,30,.09),
+            transparent 43%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(20,12,45,.86),
+            rgba(5,8,25,.94)
+        );
+
+    border: 1px solid rgba(255,215,90,.25);
+
+    box-shadow:
+        0 0 30px rgba(150,60,255,.14),
+        inset 0 0 45px rgba(255,255,255,.02);
 }
 
 
-/* =======================================================
+/* ------------------------------------------------------------
    TRIANGLE
-   ======================================================= */
+------------------------------------------------------------ */
 
-.triangle {
+.magic-triangle {
     position: absolute;
 
-    top: 25px;
     left: 50%;
+    top: 40px;
 
     transform: translateX(-50%);
 
     width: 0;
     height: 0;
 
-    border-left: 215px solid transparent;
-    border-right: 215px solid transparent;
-    border-bottom: 385px solid #f2ba2f;
+    border-left: 185px solid transparent;
+    border-right: 185px solid transparent;
+
+    border-bottom: 330px solid #eeb72c;
 
     filter:
-        drop-shadow(0 0 8px #ffd760)
-        drop-shadow(0 0 20px rgba(255,183,30,.85))
-        drop-shadow(0 0 40px rgba(255,105,0,.40));
+        drop-shadow(0 0 8px rgba(255,215,70,.9))
+        drop-shadow(0 0 24px rgba(255,160,20,.42));
 
-    animation: triangleGlow 1.6s infinite alternate;
+    animation: trianglePulse 1.8s infinite alternate;
 }
 
-@keyframes triangleGlow {
-    from {
-        filter:
-            drop-shadow(0 0 7px #ffd760)
-            drop-shadow(0 0 18px rgba(255,183,30,.65));
-    }
-    to {
-        filter:
-            drop-shadow(0 0 13px #fff3ac)
-            drop-shadow(0 0 35px rgba(255,183,30,1));
-    }
-}
-
-.triangle-inner {
+.magic-triangle-inner {
     position: absolute;
 
-    top: 49px;
     left: 50%;
+    top: 62px;
 
     transform: translateX(-50%);
 
     width: 0;
     height: 0;
 
-    border-left: 187px solid transparent;
-    border-right: 187px solid transparent;
-    border-bottom: 335px solid rgba(4,8,24,.97);
+    border-left: 161px solid transparent;
+    border-right: 161px solid transparent;
+
+    border-bottom: 288px solid #090a1d;
+}
+
+@keyframes trianglePulse {
+    from {
+        filter:
+            drop-shadow(0 0 7px rgba(255,215,70,.75))
+            drop-shadow(0 0 18px rgba(255,160,20,.30));
+    }
+
+    to {
+        filter:
+            drop-shadow(0 0 13px rgba(255,235,140,1))
+            drop-shadow(0 0 30px rgba(255,160,20,.55));
+    }
 }
 
 
-/* =======================================================
-   NUMBER CONTENT
-   ======================================================= */
+/* ------------------------------------------------------------
+   RESULT CONTENT
+------------------------------------------------------------ */
 
-.triangle-content {
+.result-content {
     position: absolute;
 
-    top: 100px;
+    top: 91px;
     left: 0;
 
     width: 100%;
 
     text-align: center;
+
     z-index: 10;
 }
 
-.crown {
-    font-size: 40px;
-    margin-bottom: 5px;
+.result-crown {
+    font-size: 35px;
 
-    filter:
-        drop-shadow(0 0 12px rgba(255,205,50,.85));
-
-    animation: crownFloat 1.6s ease-in-out infinite alternate;
+    animation: crownMove 1.8s ease-in-out infinite alternate;
 }
 
-@keyframes crownFloat {
+@keyframes crownMove {
     to {
-        transform: translateY(-7px) rotate(4deg);
+        transform: translateY(-5px);
     }
 }
 
-.magic-number {
-    font-size: 118px;
+.result-number {
+    font-size: 105px;
+
     font-weight: 900;
-    line-height: .95;
+
+    line-height: 1;
+
+    margin-top: 2px;
 
     background:
         linear-gradient(
             180deg,
-            #fffbd1,
-            #ffe462,
-            #ffaf00,
-            #fff1a0
+            #fffbc7,
+            #ffe15b,
+            #ffae00
         );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    text-shadow:
-        0 0 12px rgba(255,220,80,.55),
-        0 0 30px rgba(255,180,0,.35);
+    filter:
+        drop-shadow(0 0 10px rgba(255,205,50,.32));
 
-    animation: numberPulse 1.25s infinite alternate;
+    animation: numberPulse 1.5s infinite alternate;
 }
 
 @keyframes numberPulse {
-    from {
-        transform: scale(1);
-    }
     to {
-        transform: scale(1.055);
+        transform: scale(1.045);
     }
 }
 
-.name-wrap {
-    margin-top: 22px;
+.result-name {
+    margin-top: 20px;
 
-    font-size: 30px;
+    font-size: 27px;
+
     font-weight: 900;
-    letter-spacing: 3px;
+
+    letter-spacing: 2px;
+
     line-height: 1.3;
 }
 
-.first-name {
-    color: #4bd8ff;
+.result-first {
+    color: #4bdcff;
 
     text-shadow:
-        0 0 7px #4bd8ff,
-        0 0 18px rgba(75,216,255,.55);
+        0 0 13px rgba(75,220,255,.45);
 }
 
-.last-name {
-    color: #ff4fd8;
+.result-last {
+    color: #ff55cf;
 
     text-shadow:
-        0 0 7px #ff4fd8,
-        0 0 18px rgba(255,79,216,.55);
+        0 0 13px rgba(255,85,207,.45);
 }
 
 
-/* =======================================================
-   FLOWERS
-   ======================================================= */
+/* ------------------------------------------------------------
+   CLEAN DECORATIONS
+------------------------------------------------------------ */
 
-.flower {
+.deco {
     position: absolute;
+
     z-index: 20;
 
-    animation: flowerGlow 1.8s infinite alternate;
+    user-select: none;
+
+    animation: decoFloat 2.4s ease-in-out infinite alternate;
 }
 
-@keyframes flowerGlow {
+@keyframes decoFloat {
     from {
-        filter:
-            drop-shadow(0 0 6px rgba(255,255,255,.35));
-
-        transform: scale(.95) rotate(-5deg);
+        transform: translateY(4px) scale(.95);
     }
 
     to {
-        filter:
-            drop-shadow(0 0 18px rgba(255,80,220,.85));
-
-        transform: scale(1.08) rotate(5deg);
+        transform: translateY(-7px) scale(1.05);
     }
 }
 
-.flower1 {
-    left: -3px;
-    top: 275px;
-    font-size: 54px;
+.deco-one {
+    top: 70px;
+    left: 42px;
+    font-size: 25px;
 }
 
-.flower2 {
-    right: -3px;
-    top: 275px;
-    font-size: 54px;
+.deco-two {
+    top: 80px;
+    right: 42px;
+    font-size: 25px;
 }
 
-.flower3 {
-    left: 48px;
-    top: 350px;
-    font-size: 40px;
+.deco-three {
+    bottom: 42px;
+    left: 50px;
+    font-size: 36px;
 }
 
-.flower4 {
-    right: 48px;
-    top: 350px;
-    font-size: 40px;
+.deco-four {
+    bottom: 42px;
+    right: 50px;
+    font-size: 36px;
 }
 
-.flower5 {
-    left: 100px;
-    top: 395px;
-    font-size: 30px;
-}
-
-.flower6 {
-    right: 100px;
-    top: 395px;
-    font-size: 30px;
-}
-
-
-/* =======================================================
-   SPARKLES
-   ======================================================= */
-
-.sparkle {
-    position: absolute;
-    z-index: 30;
-
-    animation:
-        twinkle 1.1s infinite alternate;
-}
-
-.spark1 {
-    top: 90px;
-    left: 55px;
-}
-
-.spark2 {
-    top: 125px;
-    right: 55px;
-}
-
-.spark3 {
-    top: 220px;
-    left: 12px;
-}
-
-.spark4 {
-    top: 230px;
-    right: 12px;
-}
-
-.spark5 {
-    top: 55px;
-    right: 110px;
-}
-
-.spark6 {
-    top: 55px;
-    left: 110px;
-}
-
-@keyframes twinkle {
-    from {
-        opacity: .35;
-        transform: scale(.7) rotate(0deg);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1.45) rotate(25deg);
-    }
-}
-
-
-/* =======================================================
-   BUTTERFLIES
-   ======================================================= */
-
-.butterfly {
-    position: absolute;
-    z-index: 25;
-    font-size: 30px;
-
-    animation: butterflyFly 3s ease-in-out infinite alternate;
-}
-
-.butterfly1 {
-    left: 25px;
-    top: 175px;
-}
-
-.butterfly2 {
-    right: 25px;
-    top: 170px;
-    animation-delay: 1s;
-}
-
-@keyframes butterflyFly {
-    from {
-        transform: translateY(5px) rotate(-8deg);
-    }
-    to {
-        transform: translateY(-16px) rotate(8deg);
-    }
-}
-
-
-/* =======================================================
-   PLATFORM
-   ======================================================= */
-
-.platform {
-    position: absolute;
-
-    bottom: 18px;
+.deco-five {
+    bottom: 22px;
     left: 50%;
-
     transform: translateX(-50%);
-
-    width: 340px;
-    height: 42px;
-
-    border-radius: 50%;
-
-    background:
-        linear-gradient(
-            90deg,
-            #4e1eff,
-            #ff35cf,
-            #ffd542,
-            #3bcfff,
-            #4e1eff
-        );
-
-    background-size: 300% auto;
-
-    box-shadow:
-        0 0 14px #8a39ff,
-        0 0 35px rgba(255,60,220,.55);
-
-    animation: platformGlow 3s linear infinite;
-}
-
-@keyframes platformGlow {
-    to {
-        background-position: 300% center;
-    }
+    font-size: 26px;
 }
 
 
-/* =======================================================
-   RESULT INFO CARD
-   ======================================================= */
+/* ------------------------------------------------------------
+   PROFILE CARD
+------------------------------------------------------------ */
 
-.magic-card {
-    margin: 5px auto 20px auto;
+.profile-card {
     max-width: 620px;
 
-    padding: 26px;
+    margin: 10px auto 20px auto;
 
-    border-radius: 27px;
+    padding: 24px;
+
+    border-radius: 25px;
 
     background:
         linear-gradient(
-            135deg,
-            rgba(255,255,255,.10),
+            145deg,
+            rgba(255,255,255,.075),
             rgba(255,255,255,.025)
         );
 
-    border: 1px solid rgba(255,215,100,.38);
-
-    backdrop-filter: blur(14px);
+    border:
+        1px solid rgba(255,215,90,.26);
 
     box-shadow:
-        0 0 30px rgba(160,70,255,.15),
-        inset 0 0 20px rgba(255,255,255,.025);
+        0 0 25px rgba(145,70,255,.10);
 }
 
-.card-title {
+.profile-title {
     text-align: center;
-    color: #ffd75d;
-    font-size: 22px;
+
+    color: #ffd85f;
+
+    font-size: 19px;
+
     font-weight: 900;
-    margin-bottom: 20px;
+
+    margin-bottom: 18px;
 }
 
-.stats-grid {
+.profile-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
 }
 
-.stat {
+.profile-item {
     text-align: center;
 
-    background: rgba(7,8,25,.72);
+    padding: 16px 7px;
 
-    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 16px;
 
-    border-radius: 18px;
+    background:
+        rgba(6,8,24,.75);
 
-    padding: 17px 8px;
+    border:
+        1px solid rgba(255,255,255,.08);
 }
 
-.stat-icon {
-    font-size: 28px;
+.profile-icon {
+    font-size: 27px;
 }
 
-.stat-value {
-    font-size: 19px;
-    font-weight: 900;
+.profile-value {
     color: white;
-    margin-top: 5px;
-}
 
-.stat-label {
-    color: #aeb5d0;
-    font-size: 11px;
-    margin-top: 5px;
-    letter-spacing: 1px;
-}
+    font-size: 17px;
 
-.explanation {
-    text-align: center;
-    color: #e9e8f7;
-    line-height: 1.7;
-    margin-top: 20px;
-    font-size: 15px;
-}
-
-
-/* =======================================================
-   MESSAGE
-   ======================================================= */
-
-.message {
-    text-align: center;
-    margin-top: 14px;
-
-    font-size: 19px;
     font-weight: 900;
+
+    margin-top: 5px;
+}
+
+.profile-label {
+    color: #9fa8c6;
+
+    font-size: 10px;
+
+    letter-spacing: .9px;
+
+    margin-top: 5px;
+}
+
+.profile-message {
+    color: #e7e8f2;
+
+    text-align: center;
+
+    font-size: 15px;
+
+    line-height: 1.65;
+
+    margin-top: 20px;
+}
+
+.final-message {
+    text-align: center;
+
+    font-weight: 900;
+
+    font-size: 17px;
+
+    margin: 18px auto;
 
     background:
         linear-gradient(
             90deg,
-            #ffd75d,
-            #ff55d8,
-            #49d9ff,
-            #ffd75d
+            #ffd95b,
+            #ff55d0,
+            #4bdcff
         );
-
-    background-size: 250% auto;
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    animation: messageFlow 4s linear infinite;
-}
-
-@keyframes messageFlow {
-    to {
-        background-position: 250% center;
-    }
 }
 
 
-/* =======================================================
-   VOICE LABEL
-   ======================================================= */
+/* ------------------------------------------------------------
+   VOICE NOTE
+------------------------------------------------------------ */
 
 .voice-note {
     text-align: center;
 
-    color: #aeb6d6;
+    color: #9da6c3;
 
-    font-size: 13px;
+    font-size: 12px;
 
-    margin: 8px auto 20px auto;
+    margin-top: 7px;
 }
 
 
-/* =======================================================
+/* ------------------------------------------------------------
    FOOTER
-   ======================================================= */
+------------------------------------------------------------ */
 
-.footer {
+.macco-footer {
     text-align: center;
 
-    margin-top: 45px;
+    color: #7f879f;
 
-    color: #858ca8;
+    margin-top: 40px;
 
-    font-size: 13px;
+    font-size: 12px;
+
+    line-height: 1.7;
 }
 
 
-/* =======================================================
+/* ------------------------------------------------------------
    MOBILE
-   ======================================================= */
+------------------------------------------------------------ */
 
 @media (max-width: 520px) {
 
     .block-container {
-        padding-left: 12px;
-        padding-right: 12px;
+        padding-left: 13px;
+        padding-right: 13px;
     }
 
-    .magic-title {
-        font-size: 35px;
-    }
-
-    .macco {
-        font-size: 28px;
+    .macco-brand {
+        font-size: 27px;
         letter-spacing: 8px;
     }
 
-    .subtitle {
-        font-size: 15px;
+    .macco-title {
+        font-size: 34px;
     }
 
-    .stage {
-        width: 340px;
-        min-height: 420px;
+    .macco-subtitle {
+        font-size: 14px;
     }
 
-    .triangle {
-        top: 25px;
-
-        border-left-width: 165px;
-        border-right-width: 165px;
-        border-bottom-width: 300px;
+    .magic-stage {
+        min-height: 365px;
+        border-radius: 25px;
     }
 
-    .triangle-inner {
-        top: 45px;
+    .magic-triangle {
+        top: 40px;
 
-        border-left-width: 143px;
-        border-right-width: 143px;
+        border-left-width: 145px;
+        border-right-width: 145px;
+
         border-bottom-width: 260px;
     }
 
-    .triangle-content {
-        top: 82px;
+    .magic-triangle-inner {
+        top: 58px;
+
+        border-left-width: 126px;
+        border-right-width: 126px;
+
+        border-bottom-width: 226px;
     }
 
-    .crown {
-        font-size: 31px;
+    .result-content {
+        top: 78px;
     }
 
-    .magic-number {
-        font-size: 84px;
+    .result-crown {
+        font-size: 29px;
     }
 
-    .name-wrap {
-        font-size: 22px;
-        margin-top: 16px;
+    .result-number {
+        font-size: 78px;
     }
 
-    .flower1,
-    .flower2 {
-        top: 225px;
-        font-size: 41px;
+    .result-name {
+        font-size: 20px;
+        margin-top: 14px;
     }
 
-    .flower3,
-    .flower4 {
-        top: 285px;
-        font-size: 31px;
+    .deco-one {
+        left: 18px;
     }
 
-    .flower5,
-    .flower6 {
-        top: 320px;
-        font-size: 25px;
+    .deco-two {
+        right: 18px;
     }
 
-    .flower5 {
-        left: 75px;
+    .deco-three {
+        left: 22px;
+        bottom: 30px;
+        font-size: 30px;
     }
 
-    .flower6 {
-        right: 75px;
+    .deco-four {
+        right: 22px;
+        bottom: 30px;
+        font-size: 30px;
     }
 
-    .platform {
-        width: 265px;
-        height: 34px;
-        bottom: 20px;
-    }
-
-    .stats-grid {
+    .profile-grid {
         grid-template-columns: 1fr;
     }
 
-    .butterfly1 {
-        left: 10px;
-    }
-
-    .butterfly2 {
-        right: 10px;
+    .profile-card {
+        padding: 18px;
     }
 }
 
 </style>
 
-<div class="bg-orb orb1"></div>
-<div class="bg-orb orb2"></div>
-<div class="bg-orb orb3"></div>
+<div class="macco-orb macco-orb-one"></div>
+<div class="macco-orb macco-orb-two"></div>
+<div class="macco-orb macco-orb-three"></div>
 """,
     unsafe_allow_html=True,
 )
 
 
-# =========================================================
-# MACCO MAGIC ENGINE
-# =========================================================
+# ============================================================
+# MACCO DATA
+# ============================================================
 
 AURAS = [
     ("Golden", "🌟"),
@@ -1042,45 +958,52 @@ ELEMENTS = [
 ]
 
 MESSAGES = [
-    "Your energy carries creativity, confidence, and the courage to stand out.",
+    "Your MACCO energy represents creativity, confidence, and the courage to express what makes you different.",
     "Your MACCO energy reflects warmth, imagination, and a naturally bright presence.",
-    "You carry an adventurous energy that encourages discovery and new possibilities.",
-    "Your energy represents growth, determination, and the ability to create something meaningful.",
-    "Your MACCO identity shines through curiosity, originality, and positive energy.",
-    "You carry a calm but powerful energy that can inspire the people around you.",
-    "Your magic reflects ambition, imagination, and the confidence to follow your own path.",
-    "Your energy combines creativity and resilience, giving your MACCO identity a distinctive glow.",
-    "Your MACCO energy represents joy, possibility, and a willingness to dream beyond the ordinary.",
+    "Your MACCO profile carries an adventurous spirit that encourages discovery and new possibilities.",
+    "Your energy represents growth, determination, and the ability to turn ideas into something meaningful.",
+    "Your MACCO identity reflects curiosity, originality, and positive energy.",
+    "Your profile carries a calm but powerful energy that can positively influence the people around you.",
+    "Your MACCO energy reflects ambition, imagination, and confidence in following your own path.",
+    "Your profile combines creativity and resilience, giving your MACCO identity a distinctive glow.",
+    "Your MACCO energy represents joy, possibility, and the willingness to dream beyond the ordinary.",
 ]
 
 
+# ============================================================
+# MAGIC ENGINE
+# ============================================================
+
 def macco_magic(first_name, last_name):
-    """
-    Deterministically creates a MACCO profile from the full name.
 
-    Same normalized name = same MACCO profile.
-    """
-
-    normalized = " ".join(
+    normalized_name = " ".join(
         f"{first_name.strip().lower()} {last_name.strip().lower()}".split()
     )
 
-    digest = hashlib.sha256(normalized.encode("utf-8")).digest()
+    digest = hashlib.sha256(
+        normalized_name.encode("utf-8")
+    ).digest()
 
-    # Main number: 1-99
-    magic_number = int.from_bytes(digest[0:4], "big") % 99 + 1
+    magic_number = (
+        int.from_bytes(digest[0:4], "big")
+        % 99
+    ) + 1
 
-    # Power number: 1-9
-    power_number = digest[4] % 9 + 1
+    power_number = (
+        digest[4] % 9
+    ) + 1
 
-    # Aura
-    aura_name, aura_icon = AURAS[digest[5] % len(AURAS)]
+    aura_name, aura_icon = AURAS[
+        digest[5] % len(AURAS)
+    ]
 
-    # Element
-    element_name, element_icon = ELEMENTS[digest[6] % len(ELEMENTS)]
+    element_name, element_icon = ELEMENTS[
+        digest[6] % len(ELEMENTS)
+    ]
 
-    # Message
-    message = MESSAGES[digest[7] % len(MESSAGES)]
+    message = MESSAGES[
+        digest[7] % len(MESSAGES)
+    ]
 
     return {
         "magic_number": magic_number,
@@ -1093,326 +1016,307 @@ def macco_magic(first_name, last_name):
     }
 
 
-# =========================================================
-# BROWSER VOICE
-# =========================================================
+# ============================================================
+# VOICE
+# ============================================================
 
-def speak_macco_result(
+def macco_voice(
     first_name,
     last_name,
-    magic_number,
-    power_number,
-    aura,
-    element,
-    message,
+    result,
     reveal_id,
 ):
 
-    # json.dumps safely prepares Python strings for JavaScript.
     spoken_text = (
-        f"Welcome {first_name} {last_name}, to MACCO Magic. "
-        f"Your MACCO magic number is {magic_number}. "
-        f"Your power number is {power_number}. "
-        f"Your aura is {aura}, and your element is {element}. "
-        f"{message} "
-        f"Remember, {first_name}, you are unique. You are magic. "
-        f"Welcome to your MACCO identity."
+        f"Welcome {first_name} {last_name} to MACCO Magic. "
+        f"I am your MACCO voice guide. "
+        f"Your magic number is {result['magic_number']}. "
+        f"Your power number is {result['power_number']}. "
+        f"Your MACCO aura is {result['aura']}. "
+        f"Your element is {result['element']}. "
+        f"{result['message']} "
+        f"{first_name}, your MACCO profile is unique to your name. "
+        f"Keep shining, keep creating, and remember: "
+        f"you are unique, you are color, and you are magic."
     )
 
-    spoken_json = json.dumps(spoken_text)
+    text_json = json.dumps(spoken_text)
 
-    component_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
+    # reveal_id is included so a fresh component is generated
+    # after each successful reveal.
+    component_key = json.dumps(str(reveal_id))
 
-        <style>
+    voice_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
 
-            html, body {{
-                margin: 0;
-                padding: 0;
-                background: transparent;
-                font-family: Arial, Helvetica, sans-serif;
-            }}
+<style>
 
-            .voice-box {{
-                width: 100%;
-                box-sizing: border-box;
+html,
+body {{
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+}}
 
-                padding: 13px;
+.voice-card {{
+    box-sizing: border-box;
 
-                border-radius: 18px;
+    width: 100%;
 
-                background:
-                    linear-gradient(
-                        90deg,
-                        rgba(255,184,30,.15),
-                        rgba(255,60,205,.15),
-                        rgba(60,210,255,.15)
-                    );
+    padding: 13px;
 
-                border:
-                    1px solid rgba(255,220,100,.35);
+    text-align: center;
 
-                text-align: center;
-            }}
+    border-radius: 16px;
 
-            .voice-title {{
-                color: #ffe273;
-                font-size: 13px;
-                font-weight: 800;
-                margin-bottom: 9px;
-            }}
+    border:
+        1px solid rgba(255,215,90,.30);
 
-            button {{
-                border: 1px solid rgba(255,230,130,.8);
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,190,35,.10),
+            rgba(255,70,200,.10),
+            rgba(65,215,255,.10)
+        );
+}}
 
-                border-radius: 14px;
+.voice-label {{
+    color: #ffe47a;
 
-                padding: 10px 18px;
+    font-size: 12px;
 
-                background:
-                    linear-gradient(
-                        90deg,
-                        #ffbc25,
-                        #ffe76e
-                    );
+    font-weight: 800;
 
-                color: #17100a;
+    margin-bottom: 8px;
+}}
 
-                font-size: 14px;
+.voice-button {{
+    border:
+        1px solid rgba(255,230,135,.75);
 
-                font-weight: 900;
+    border-radius: 13px;
 
-                cursor: pointer;
+    padding: 10px 18px;
 
-                box-shadow:
-                    0 0 12px rgba(255,200,40,.35);
-            }}
+    cursor: pointer;
 
-            button:hover {{
-                transform: scale(1.03);
-            }}
+    color: #171008;
 
-        </style>
+    font-size: 14px;
 
-    </head>
+    font-weight: 900;
 
-    <body>
+    background:
+        linear-gradient(
+            90deg,
+            #ffbb25,
+            #ffe878
+        );
 
-        <div class="voice-box">
+    box-shadow:
+        0 0 12px rgba(255,205,60,.25);
+}}
 
-            <div class="voice-title">
-                🔊 MACCO VOICE GUIDE
-            </div>
+.voice-button:hover {{
+    transform: scale(1.02);
+}}
 
-            <button onclick="speakMacco()">
-                🔊 Hear My MACCO Reading
-            </button>
+</style>
+</head>
 
-        </div>
+<body>
 
+<div class="voice-card">
 
-        <script>
+    <div class="voice-label">
+        🔊 MACCO VOICE
+    </div>
 
-            const textToSpeak = {spoken_json};
+    <button
+        class="voice-button"
+        onclick="speakMacco()"
+    >
+        🔊 Hear My Reading
+    </button>
 
-            function findPreferredVoice() {{
+</div>
 
-                const voices =
-                    window.speechSynthesis.getVoices();
+<script>
 
-                if (!voices || voices.length === 0) {{
-                    return null;
-                }}
+const maccoText = {text_json};
+const revealID = {component_key};
 
-                /*
-                Prefer natural English voices when available.
-                Exact voices depend on the visitor's device/browser.
-                */
+function chooseVoice() {{
 
-                const preferredNames = [
-                    "Samantha",
-                    "Google US English",
-                    "Microsoft Aria Online",
-                    "Microsoft Jenny Online",
-                    "Microsoft Zira",
-                    "Karen",
-                    "Moira"
-                ];
+    const voices =
+        window.speechSynthesis.getVoices();
 
-                for (const preferred of preferredNames) {{
+    if (!voices || voices.length === 0) {{
+        return null;
+    }}
 
-                    const voice = voices.find(v =>
-                        v.name.toLowerCase().includes(
-                            preferred.toLowerCase()
+    const preferred = [
+        "Microsoft Aria",
+        "Microsoft Jenny",
+        "Samantha",
+        "Google US English",
+        "Microsoft Zira",
+        "Karen",
+        "Moira"
+    ];
+
+    for (const wanted of preferred) {{
+
+        const found =
+            voices.find(
+                voice =>
+                    voice.name
+                        .toLowerCase()
+                        .includes(
+                            wanted.toLowerCase()
                         )
-                    );
+            );
 
-                    if (voice) {{
-                        return voice;
-                    }}
-                }}
+        if (found) {{
+            return found;
+        }}
+    }}
 
-                const englishVoice = voices.find(v =>
-                    v.lang &&
-                    v.lang.toLowerCase().startsWith("en")
-                );
+    const englishVoice =
+        voices.find(
+            voice =>
+                voice.lang &&
+                voice.lang
+                    .toLowerCase()
+                    .startsWith("en")
+        );
 
-                return englishVoice || voices[0];
-            }}
-
-
-            function speakMacco() {{
-
-                if (!("speechSynthesis" in window)) {{
-                    alert(
-                        "Voice is not supported by this browser."
-                    );
-                    return;
-                }}
-
-                window.speechSynthesis.cancel();
-
-                const speech =
-                    new SpeechSynthesisUtterance(
-                        textToSpeak
-                    );
-
-                const voice =
-                    findPreferredVoice();
-
-                if (voice) {{
-                    speech.voice = voice;
-                }}
-
-                speech.lang = "en-US";
-
-                /*
-                Slightly slower rate gives the reading
-                a more polished storytelling feeling.
-                */
-
-                speech.rate = 0.88;
-
-                speech.pitch = 1.08;
-
-                speech.volume = 1.0;
-
-                window.speechSynthesis.speak(
-                    speech
-                );
-            }}
+    return englishVoice || voices[0];
+}}
 
 
-            /*
-            Browsers may block automatic speech until
-            the visitor interacts with the page.
+function speakMacco() {{
 
-            We attempt auto-play after the result appears.
-            If blocked, the voice button remains available.
-            */
+    if (!("speechSynthesis" in window)) {{
 
-            function attemptAutoWelcome() {{
+        alert(
+            "Voice is not supported on this browser."
+        );
 
-                setTimeout(() => {{
+        return;
+    }}
 
-                    try {{
-                        speakMacco();
-                    }}
-                    catch (error) {{
-                        console.log(
-                            "Automatic MACCO voice waiting for user interaction."
-                        );
-                    }}
+    window.speechSynthesis.cancel();
 
-                }}, 700);
-            }}
+    const speech =
+        new SpeechSynthesisUtterance(
+            maccoText
+        );
+
+    const selectedVoice =
+        chooseVoice();
+
+    if (selectedVoice) {{
+        speech.voice = selectedVoice;
+    }}
+
+    speech.lang = "en-US";
+
+    speech.rate = 0.90;
+
+    speech.pitch = 1.05;
+
+    speech.volume = 1.0;
+
+    window.speechSynthesis.speak(
+        speech
+    );
+}}
 
 
-            if (
-                "speechSynthesis" in window
-            ) {{
+function prepareVoices() {{
 
-                window.speechSynthesis.onvoiceschanged =
-                    function() {{
-                        window.speechSynthesis.getVoices();
-                    }};
+    window.speechSynthesis.getVoices();
+}}
 
-                attemptAutoWelcome();
-            }}
 
-        </script>
+if ("speechSynthesis" in window) {{
 
-    </body>
-    </html>
-    """
+    prepareVoices();
+
+    window.speechSynthesis.onvoiceschanged =
+        prepareVoices;
+
+}}
+
+</script>
+
+</body>
+</html>
+"""
 
     components.html(
-        component_html,
-        height=100,
+        voice_html,
+        height=92,
         scrolling=False,
     )
 
 
-# =========================================================
+# ============================================================
 # HEADER
-# =========================================================
+# ============================================================
+
+header_html = """
+<div class="macco-top">✦ ✨ ✦</div>
+<div class="magic-orb-wrap">
+    <div class="magic-orb-ring"></div>
+    <div class="magic-orb"></div>
+</div>
+<div class="macco-brand">MACCO</div>
+<div class="macco-title">YOUR MAGIC NUMBER</div>
+<div class="macco-subtitle">
+Enter your name and discover your personal MACCO number,
+power number, aura and element.
+</div>
+"""
 
 st.markdown(
-    """
-<div class="top-decoration">
-    ✦ ✨ 🌸 ✨ ✦
-</div>
-
-<div class="disco-wrap">
-    <div class="disco-ring"></div>
-    <div class="disco-ball"></div>
-</div>
-
-<div class="macco">
-    ✦ MACCO ✦
-</div>
-
-<div class="magic-title">
-    ✨ YOUR MAGIC NUMBER ✨
-</div>
-
-<div class="subtitle">
-    Enter your name and step into the colorful world of MACCO.
-    Discover your Magic Number, Power Number, Aura and Element.
-</div>
-""",
+    header_html,
     unsafe_allow_html=True,
 )
 
 
-# =========================================================
+# ============================================================
 # INPUTS
-# =========================================================
+# ============================================================
 
 first_name = st.text_input(
     "✨ FIRST NAME",
     placeholder="Enter your first name",
-    key="first_name_input",
 )
 
 last_name = st.text_input(
-    "🌸 LAST NAME",
+    "✨ LAST NAME",
     placeholder="Enter your last name",
-    key="last_name_input",
 )
 
 
-# =========================================================
-# REVEAL BUTTON
-# =========================================================
+# ============================================================
+# REVEAL
+# ============================================================
 
-if st.button(
+reveal_clicked = st.button(
     "✨ REVEAL MY MACCO MAGIC ✨",
     use_container_width=True,
-):
+)
+
+
+if reveal_clicked:
 
     clean_first = first_name.strip()
     clean_last = last_name.strip()
@@ -1420,228 +1324,158 @@ if st.button(
     if not clean_first or not clean_last:
 
         st.warning(
-            "✨ Please enter both your first and last name."
+            "Please enter both your first and last name."
         )
 
     else:
 
-        st.session_state.result = macco_magic(
+        st.session_state.macco_first = clean_first
+
+        st.session_state.macco_last = clean_last
+
+        st.session_state.macco_result = macco_magic(
             clean_first,
             clean_last,
         )
-
-        st.session_state.first_name = clean_first
-        st.session_state.last_name = clean_last
 
         st.session_state.reveal_id += 1
 
         st.balloons()
 
 
-# =========================================================
-# DISPLAY RESULT
-# =========================================================
+# ============================================================
+# RESULT
+# ============================================================
 
-if st.session_state.result:
+if st.session_state.macco_result is not None:
 
-    result = st.session_state.result
+    result = st.session_state.macco_result
 
-    first = st.session_state.first_name
-    last = st.session_state.last_name
+    first = st.session_state.macco_first
+    last = st.session_state.macco_last
 
-    safe_first = html.escape(first.upper())
-    safe_last = html.escape(last.upper())
+    safe_first = html.escape(
+        first.upper()
+    )
 
-    safe_aura = html.escape(result["aura"])
-    safe_element = html.escape(result["element"])
-    safe_message = html.escape(result["message"])
+    safe_last = html.escape(
+        last.upper()
+    )
 
-    magic_number = result["magic_number"]
-    power_number = result["power_number"]
+    safe_aura = html.escape(
+        result["aura"]
+    )
 
-    aura_icon = result["aura_icon"]
-    element_icon = result["element_icon"]
+    safe_element = html.escape(
+        result["element"]
+    )
 
-    result_html = f"""
+    safe_message = html.escape(
+        result["message"]
+    )
 
-<div class="symbol-label">
-    ✦ YOUR MACCO MAGIC SYMBOL ✦
-</div>
+    magic_number = result[
+        "magic_number"
+    ]
 
-<div class="reveal-text">
-    Your unique MACCO identity has been revealed.
-</div>
+    power_number = result[
+        "power_number"
+    ]
 
+    aura_icon = result[
+        "aura_icon"
+    ]
 
-<div class="stage">
+    element_icon = result[
+        "element_icon"
+    ]
 
-    <div class="triangle"></div>
-    <div class="triangle-inner"></div>
 
+    # ========================================================
+    # IMPORTANT:
+    # HTML is intentionally compact and left aligned.
+    # This prevents Streamlit/Markdown from showing HTML
+    # tags as code on the screen.
+    # ========================================================
 
-    <div class="sparkle spark1">
-        ✨
-    </div>
+    result_html = (
+        f'<div class="result-heading">✦ YOUR MACCO MAGIC ✦</div>'
+        f'<div class="result-subheading">Your unique MACCO identity has been revealed.</div>'
 
-    <div class="sparkle spark2">
-        ✨
-    </div>
+        f'<div class="magic-stage">'
 
-    <div class="sparkle spark3">
-        ✦
-    </div>
+        f'<div class="magic-triangle"></div>'
+        f'<div class="magic-triangle-inner"></div>'
 
-    <div class="sparkle spark4">
-        ✦
-    </div>
+        f'<div class="deco deco-one">✨</div>'
+        f'<div class="deco deco-two">✨</div>'
+        f'<div class="deco deco-three">🌸</div>'
+        f'<div class="deco deco-four">🌺</div>'
+        f'<div class="deco deco-five">✦</div>'
 
-    <div class="sparkle spark5">
-        ⭐
-    </div>
+        f'<div class="result-content">'
 
-    <div class="sparkle spark6">
-        ⭐
-    </div>
+        f'<div class="result-crown">👑</div>'
 
+        f'<div class="result-number">'
+        f'{magic_number}'
+        f'</div>'
 
-    <div class="butterfly butterfly1">
-        🦋
-    </div>
+        f'<div class="result-name">'
 
-    <div class="butterfly butterfly2">
-        🦋
-    </div>
+        f'<div class="result-first">'
+        f'{safe_first}'
+        f'</div>'
 
+        f'<div class="result-last">'
+        f'{safe_last}'
+        f'</div>'
 
-    <div class="flower flower1">
-        🌸
-    </div>
+        f'</div>'
 
-    <div class="flower flower2">
-        🌺
-    </div>
+        f'</div>'
 
-    <div class="flower flower3">
-        🌼
-    </div>
+        f'</div>'
 
-    <div class="flower flower4">
-        🌷
-    </div>
+        f'<div class="profile-card">'
 
-    <div class="flower flower5">
-        🌹
-    </div>
+        f'<div class="profile-title">'
+        f'✨ YOUR MACCO PROFILE ✨'
+        f'</div>'
 
-    <div class="flower flower6">
-        🌻
-    </div>
+        f'<div class="profile-grid">'
+
+        f'<div class="profile-item">'
+        f'<div class="profile-icon">⚡</div>'
+        f'<div class="profile-value">{power_number}</div>'
+        f'<div class="profile-label">POWER NUMBER</div>'
+        f'</div>'
+
+        f'<div class="profile-item">'
+        f'<div class="profile-icon">{aura_icon}</div>'
+        f'<div class="profile-value">{safe_aura}</div>'
+        f'<div class="profile-label">AURA</div>'
+        f'</div>'
+
+        f'<div class="profile-item">'
+        f'<div class="profile-icon">{element_icon}</div>'
+        f'<div class="profile-value">{safe_element}</div>'
+        f'<div class="profile-label">ELEMENT</div>'
+        f'</div>'
+
+        f'</div>'
+
+        f'<div class="profile-message">'
+        f'{safe_message}'
+        f'</div>'
+
+        f'</div>'
+
+        f'<div class="final-message">'
+        f'✨ YOU ARE UNIQUE • YOU ARE COLOR • YOU ARE MAGIC ✨'
+        f'</div>'
+    )
 
-
-    <div class="triangle-content">
-
-        <div class="crown">
-            👑
-        </div>
-
-        <div class="magic-number">
-            {magic_number}
-        </div>
-
-        <div class="name-wrap">
-
-            <div class="first-name">
-                {safe_first}
-            </div>
-
-            <div class="last-name">
-                {safe_last}
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="platform"></div>
-
-</div>
-
-
-<div class="magic-card">
-
-    <div class="card-title">
-        ✨ YOUR MACCO PROFILE ✨
-    </div>
-
-
-    <div class="stats-grid">
-
-        <div class="stat">
-
-            <div class="stat-icon">
-                ⚡
-            </div>
-
-            <div class="stat-value">
-                {power_number}
-            </div>
-
-            <div class="stat-label">
-                POWER NUMBER
-            </div>
-
-        </div>
-
-
-        <div class="stat">
-
-            <div class="stat-icon">
-                {aura_icon}
-            </div>
-
-            <div class="stat-value">
-                {safe_aura}
-            </div>
-
-            <div class="stat-label">
-                MACCO AURA
-            </div>
-
-        </div>
-
-
-        <div class="stat">
-
-            <div class="stat-icon">
-                {element_icon}
-            </div>
-
-            <div class="stat-value">
-                {safe_element}
-            </div>
-
-            <div class="stat-label">
-                ELEMENT
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="explanation">
-        {safe_message}
-    </div>
-
-</div>
-
-
-<div class="message">
-    ✨ YOU ARE UNIQUE • YOU ARE COLOR • YOU ARE MAGIC ✨
-</div>
-
-"""
 
     st.markdown(
         result_html,
@@ -1649,54 +1483,40 @@ if st.session_state.result:
     )
 
 
-    # =====================================================
-    # VOICE READING
-    # =====================================================
+    # ========================================================
+    # VOICE
+    # ========================================================
 
-    speak_macco_result(
+    macco_voice(
         first_name=first,
         last_name=last,
-        magic_number=magic_number,
-        power_number=power_number,
-        aura=result["aura"],
-        element=result["element"],
-        message=result["message"],
+        result=result,
         reveal_id=st.session_state.reveal_id,
     )
 
+
     st.markdown(
-        """
-<div class="voice-note">
-    🔊 MACCO will welcome you and explain your reading.
-    If your browser blocks automatic audio, tap
-    <b>Hear My MACCO Reading</b>.
-</div>
-""",
+        '<div class="voice-note">'
+        'Tap the voice button to hear MACCO welcome you '
+        'and explain your result.'
+        '</div>',
         unsafe_allow_html=True,
     )
 
 
-# =========================================================
+# ============================================================
 # FOOTER
-# =========================================================
+# ============================================================
+
+footer_html = (
+    '<div class="macco-footer">'
+    '✨ 🌸 ✨<br>'
+    '<b>Powered by MACCO</b><br>'
+    'Every name carries its own sparkle.'
+    '</div>'
+)
 
 st.markdown(
-    """
-<div class="footer">
-
-    🌸 ✨ 🦋 ✨ 🌺
-
-    <br><br>
-
-    Powered by <b>MACCO</b> ✨
-
-    <br>
-
-    <span style="font-size:11px;">
-        Every name carries its own MACCO sparkle.
-    </span>
-
-</div>
-""",
+    footer_html,
     unsafe_allow_html=True,
 )
